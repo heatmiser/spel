@@ -452,7 +452,7 @@ variable "amigen7_repo_sources" {
 variable "amigen7_source_branch" {
   description = "Branch that will be checked out when cloning AMIgen7"
   type        = string
-  default     = "master"
+  default     = "dev"
 }
 
 variable "amigen7_source_url" {
@@ -532,7 +532,7 @@ variable "amigen8_repo_sources" {
 variable "amigen8_source_branch" {
   description = "Branch that will be checked out when cloning AMIgen8"
   type        = string
-  default     = "master"
+  default     = "dev"
 }
 
 variable "amigen8_source_url" {
