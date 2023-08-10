@@ -69,7 +69,7 @@ variable "aws_source_ami_filter_centos7_hvm" {
     owners = list(string)
   })
   default = {
-    name = "CentOS 7.* x86_64,*-Recovery (No-LVM)-ACB-CentOS7-HVM-SRIOV_ENA"
+    name = "CentOS Linux 7 x86_64 - 2211"
     owners = [
       "125523088429", # CentOS Commercial, https://wiki.centos.org/Cloud/AWS
       "701759196663", # SPEL Commercial, https://github.com/plus3it/spel
@@ -466,11 +466,12 @@ variable "amigen7_storage_layout" {
   type        = list(string)
   default = [
     "/:rootVol:6",
-    "swap:swapVol:2",
+    "swap:swapVol:1",
     "/home:homeVol:1",
     "/var:varVol:2",
     "/var/log:logVol:2",
-    "/var/log/audit:auditVol:100%FREE",
+    "/var/log/audit:auditVol:2",
+    "/data:dataVol:1",
   ]
 }
 
@@ -593,7 +594,7 @@ variable "spel_identifier" {
 variable "spel_root_volume_size" {
   description = "Size in GB of the root volume"
   type        = number
-  default     = 20
+  default     = 25
 }
 
 variable "spel_ssh_username" {
@@ -727,7 +728,7 @@ locals {
   amigen8_storage_layout = join(",", var.amigen8_storage_layout)
 
   # Template the description string
-  description = "STIG-partitioned [*NOT HARDENED*], LVM-enabled, \"minimal\" %s, with updates through ${formatdate("YYYY-MM-DD", timestamp())}. Default username `maintuser`. See ${var.spel_description_url}."
+  description = "STIG-partitioned [*NOT HARDENED*], LVM-enabled, \"minimal\" %s, with updates through ${formatdate("YYYY-MM-DD", timestamp())}. Default username `ec2-user`. See ${var.spel_description_url}."
 }
 
 ###
