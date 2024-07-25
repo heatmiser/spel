@@ -81,7 +81,16 @@ DEFAULTREPOS=(
     updates
     extras
 )
-if [[ $(rpm --quiet -q redhat-release-server)$? -eq 0 ]]
+if [[ $(grep --quiet "Oracle Linux Server" /etc/os-release)$? -eq 0 ]]
+then
+    DEFAULTREPOS=(
+        ol7_latest
+        ol7_UEKR4
+        ol7_UEKR5
+        ol7_UEKR6
+        ol7_optional_latest
+    )
+elif [[ $(rpm --quiet -q redhat-release-server)$? -eq 0 ]]
 then
     DEFAULTREPOS=(
         # RHUI 2 repo names
@@ -103,20 +112,20 @@ then
         rhui-rhel-7-server-rhui-extras-rpms
     )
 fi
-DEFAULTREPOS+=(epel)
+#DEFAULTREPOS+=(epel)
 
 # Default to enabling default repos
 ENABLEDREPOS=$(IFS=,; echo "${DEFAULTREPOS[*]}")
 
-if [[ "$USEDEFAULTREPOS" != "true" ]]
-then
-    # Enable AMIGENREPOS exclusively when instructed not to use default repos
-    ENABLEDREPOS="${AMIGENREPOS}"
-elif [[ -n "${AMIGENREPOS:-}" ]]
-then
-    # When using default repos, also enable AMIGENREPOS if present
-    ENABLEDREPOS+=,"${AMIGENREPOS}"
-fi
+#if [[ "$USEDEFAULTREPOS" != "true" ]]
+#then
+#    # Enable AMIGENREPOS exclusively when instructed not to use default repos
+#    ENABLEDREPOS="${AMIGENREPOS}"
+#elif [[ -n "${AMIGENREPOS:-}" ]]
+#then
+#    # When using default repos, also enable AMIGENREPOS if present
+#    ENABLEDREPOS+=,"${AMIGENREPOS}"
+#fi
 
 MKFSFORCEOPT="-F"
 if [[ "$BUILDNAME" =~ "xfs" ]]
@@ -208,30 +217,31 @@ function CollectManifest {
 
     if [[ "${CLOUDPROVIDER}" == "aws" ]]
     then
-        if [[ -n "$AWSCLIV1SOURCE" ]]
-        then
-            echo "Saving the aws-cli-v1 version to the manifest"
-            [[ -o xtrace ]] && XTRACE='set -x' || XTRACE='set +x'
-            set +x
-            (chroot "${AMIGENCHROOT}" /usr/local/bin/aws1 --version) 2>&1 | tee -a /tmp/manifest.txt
-            eval "$XTRACE"
-        fi
-        if [[ -n "$AWSCLIV2SOURCE" ]]
-        then
-            echo "Saving the aws-cli-v2 version to the manifest"
-            [[ -o xtrace ]] && XTRACE='set -x' || XTRACE='set +x'
-            set +x
-            (chroot "${AMIGENCHROOT}" /usr/local/bin/aws2 --version) 2>&1 | tee -a /tmp/manifest.txt
-            eval "$XTRACE"
-        fi
-        if [[ -n "$AWSCFNBOOTSTRAP" ]]
-        then
-            echo "Saving the cfn bootstrap version to the manifest"
-            [[ -o xtrace ]] && XTRACE='set -x' || XTRACE='set +x'
-            set +x
-            (chroot "${AMIGENCHROOT}" python3 -m pip list) | grep aws-cfn-bootstrap | tee -a /tmp/manifest.txt
-            eval "$XTRACE"
-        fi
+        echo "Skipping writing AWS-related tools to the manifest"
+        #if [[ -n "$AWSCLIV1SOURCE" ]]
+        #then
+        #    echo "Saving the aws-cli-v1 version to the manifest"
+        #    [[ -o xtrace ]] && XTRACE='set -x' || XTRACE='set +x'
+        #    set +x
+        #    (chroot "${AMIGENCHROOT}" /usr/local/bin/aws1 --version) 2>&1 | tee -a /tmp/manifest.txt
+        #    eval "$XTRACE"
+        #fi
+        #if [[ -n "$AWSCLIV2SOURCE" ]]
+        #then
+        #    echo "Saving the aws-cli-v2 version to the manifest"
+        #    [[ -o xtrace ]] && XTRACE='set -x' || XTRACE='set +x'
+        #    set +x
+        #    (chroot "${AMIGENCHROOT}" /usr/local/bin/aws2 --version) 2>&1 | tee -a /tmp/manifest.txt
+        #    eval "$XTRACE"
+        #fi
+        #if [[ -n "$AWSCFNBOOTSTRAP" ]]
+        #then
+        #    echo "Saving the cfn bootstrap version to the manifest"
+        #    [[ -o xtrace ]] && XTRACE='set -x' || XTRACE='set +x'
+        #    set +x
+        #    (chroot "${AMIGENCHROOT}" python3 -m pip list) | grep aws-cfn-bootstrap | tee -a /tmp/manifest.txt
+        #    eval "$XTRACE"
+        #fi
     elif [[ "${CLOUDPROVIDER}" == "azure" ]]
     then
         echo "Saving the waagent version to the manifest"
@@ -460,14 +470,14 @@ ComposeChrootCliString
 echo "Executing ChrootBuild.sh"
 bash -eux -o pipefail "${ELBUILD}"/ChrootBuild.sh "${CLIOPT_CUSTOMREPO[@]}" "${CLIOPT_EXTRARPMS[@]}" "${CLIOPT_ALTMANIFEST[@]}"
 
-# Run AWSutils.sh
-if [[ "${CLOUDPROVIDER}" == "aws" ]]
-then
-    ComposeAWSutilsString
-    # Epel mirrors are maddening; retry 5 times to work around issues
-    echo "Executing AWSutils.sh"
-    retry 5 bash -eux -o pipefail "${ELBUILD}/AWSutils.sh ${CLIOPT_AWSUTILS[*]}"
-fi
+## Run AWSutils.sh
+#if [[ "${CLOUDPROVIDER}" == "aws" ]]
+#then
+#    ComposeAWSutilsString
+#    # Epel mirrors are maddening; retry 5 times to work around issues
+#    echo "Executing AWSutils.sh"
+#    retry 5 bash -eux -o pipefail "${ELBUILD}/AWSutils.sh ${CLIOPT_AWSUTILS[*]}"
+#fi
 
 echo "Executing ChrootCfg.sh"
 bash -eux -o pipefail "${ELBUILD}"/ChrootCfg.sh || \

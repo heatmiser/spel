@@ -197,10 +197,10 @@ function BuildChroot {
     # Invoke CSP-specific utilities scripts
     case "${CLOUDPROVIDER}" in
         # Invoke AWSutils installer
-        aws)
-            bash -euxo pipefail "${ELBUILD}"/$( ComposeAWSutilsString ) || \
-                err_exit "Failure encountered with AWSutils.sh"
-            ;;
+        #aws)
+        #    bash -euxo pipefail "${ELBUILD}"/$( ComposeAWSutilsString ) || \
+        #        err_exit "Failure encountered with AWSutils.sh"
+        #    ;;
         azure)
             (
                 export HTTP_PROXY
@@ -239,33 +239,34 @@ function CollectManifest {
 
     if [[ "${CLOUDPROVIDER}" == "aws" ]]
     then
-        if [[ -n "$AWSCLIV1SOURCE" ]]
-        then
-            echo "Saving the aws-cli-v1 version to the manifest"
-            [[ -o xtrace ]] && XTRACE='set -x' || XTRACE='set +x'
-            set +x
-            (chroot "${AMIGENCHROOT}" /usr/local/bin/aws1 --version) 2>&1 | \
-                tee -a /tmp/manifest.txt
-            eval "$XTRACE"
-        fi
-        if [[ -n "$AWSCLIV2SOURCE" ]]
-        then
-            echo "Saving the aws-cli-v2 version to the manifest"
-            [[ -o xtrace ]] && XTRACE='set -x' || XTRACE='set +x'
-            set +x
-            (chroot "${AMIGENCHROOT}" /usr/local/bin/aws2 --version) 2>&1 | \
-                tee -a /tmp/manifest.txt
-            eval "$XTRACE"
-        fi
-        if [[ -n "$AWSCFNBOOTSTRAP" ]]
-        then
-            echo "Saving the cfn bootstrap version to the manifest"
-            [[ -o xtrace ]] && XTRACE='set -x' || XTRACE='set +x'
-            set +x
-            (chroot "${AMIGENCHROOT}" python3 -m pip list) | \
-                grep aws-cfn-bootstrap | tee -a /tmp/manifest.txt
-            eval "$XTRACE"
-        fi
+        echo "Skipping writing AWS-related tools to the manifest"
+        #if [[ -n "$AWSCLIV1SOURCE" ]]
+        #then
+        #    echo "Saving the aws-cli-v1 version to the manifest"
+        #    [[ -o xtrace ]] && XTRACE='set -x' || XTRACE='set +x'
+        #    set +x
+        #    (chroot "${AMIGENCHROOT}" /usr/local/bin/aws1 --version) 2>&1 | \
+        #        tee -a /tmp/manifest.txt
+        #    eval "$XTRACE"
+        #fi
+        #if [[ -n "$AWSCLIV2SOURCE" ]]
+        #then
+        #    echo "Saving the aws-cli-v2 version to the manifest"
+        #    [[ -o xtrace ]] && XTRACE='set -x' || XTRACE='set +x'
+        #    set +x
+        #    (chroot "${AMIGENCHROOT}" /usr/local/bin/aws2 --version) 2>&1 | \
+        #        tee -a /tmp/manifest.txt
+        #    eval "$XTRACE"
+        #fi
+        #if [[ -n "$AWSCFNBOOTSTRAP" ]]
+        #then
+        #    echo "Saving the cfn bootstrap version to the manifest"
+        #    [[ -o xtrace ]] && XTRACE='set -x' || XTRACE='set +x'
+        #    set +x
+        #    (chroot "${AMIGENCHROOT}" python3 -m pip list) | \
+        #        grep aws-cfn-bootstrap | tee -a /tmp/manifest.txt
+        #    eval "$XTRACE"
+        #fi
     elif [[ "${CLOUDPROVIDER}" == "azure" ]]
     then
         echo "Saving the waagent version to the manifest"
