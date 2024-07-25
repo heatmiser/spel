@@ -65,3 +65,7 @@ terraform.tfstate*
 go.*
 tardigrade-ci
 .tardigrade-ci
+
+*base-standard*.hcl
+spel/minimal-linux-*.pkr.hcl
+spel/minimal-linux??.pkr.hcl
