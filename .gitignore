@@ -66,3 +66,5 @@ go.*
 tardigrade-ci
 .tardigrade-ci
 *.pem
+*base-standard.pkrvars.hcl
+spel/minimal-linux-*.pkr.hcl
